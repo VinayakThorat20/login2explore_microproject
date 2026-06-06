@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://login2explore.com/jpdb/resources/js/0.3.0/jpdb-commons.js"></script>
 </head>
 <body>
 <div class="container my-5">
@@ -16,11 +15,11 @@
             <h3>Student Enrollment Form (Micro Project)</h3>
         </div>
         <div class="card-body">
-            <form id="studentForm" method="post">
+            <form id="studentForm">
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="rollNo">Roll No <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="rollNo" placeholder="Enter Roll No" onchange="getStudent()">
+                        <input type="text" class="form-control" id="rollNo" placeholder="Enter Roll No" onchange="getStudent()" onblur="getStudent()">
                     </div>
                     <div class="form-group col-md-6">
                         <label for="fullName">Full Name <span class="text-danger">*</span></label>
@@ -30,7 +29,7 @@
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="studentClass">Class <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="studentClass" placeholder="Enter Class (e.g., 10th, 12th)" disabled>
+                        <input type="text" class="form-control" id="studentClass" placeholder="Enter Class" disabled>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="birthDate">Birth Date <span class="text-danger">*</span></label>
@@ -39,7 +38,7 @@
                 </div>
                 <div class="form-group">
                     <label for="address">Address <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="address" rows="2" placeholder="Enter Complete Address" disabled></textarea>
+                    <textarea class="form-control" id="address" rows="2" placeholder="Enter Address" disabled></textarea>
                 </div>
                 <div class="form-group">
                     <label for="enrollmentDate">Enrollment Date <span class="text-danger">*</span></label>
@@ -58,137 +57,29 @@
 </div>
 
 <script>
-    // Configuration Global Constants
     const jpdbBaseURL = "http://api.login2explore.com:5577";
-    const jpdbIRL = "/api/irl";
-    const jpdbIML = "/api/iml";
-    const connectionToken = "764066020|7385821567730593106|764064680";
+    const connectionToken = "764066020|7385821567736244257|764064684"; // Your active fresh token
     const dbName = "SCHOOL-DB";
     const relName = "STUDENT-TABLE";
 
-    // Initialize form on page load
     $(document).ready(function() {
         resetForm();
     });
 
-    // Step-2/Reset Logic: Clear fields, disable except primary key, set focus
     function resetForm() {
-        $("#rollNo").val("");
-        $("#fullName").val("");
-        $("#studentClass").val("");
-        $("#birthDate").val("");
-        $("#address").val("");
-        $("#enrollmentDate").val("");
+        $("#rollNo").val("").prop("disabled", false);
+        $("#fullName").val("").prop("disabled", true);
+        $("#studentClass").val("").prop("disabled", true);
+        $("#birthDate").val("").prop("disabled", true);
+        $("#address").val("").prop("disabled", true);
+        $("#enrollmentDate").val("").prop("disabled", true);
         
-        // Form field accessibility state
-        $("#rollNo").prop("disabled", false);
-        $("#fullName").prop("disabled", true);
-        $("#studentClass").prop("disabled", true);
-        $("#birthDate").prop("disabled", true);
-        $("#address").prop("disabled", true);
-        $("#enrollmentDate").prop("disabled", true);
-        
-        // Control Button initial states
         $("#save").prop("disabled", true);
         $("#update").prop("disabled", true);
         $("#reset").prop("disabled", true);
         
         localStorage.removeItem("recno");
         $("#rollNo").focus();
-    }
-
-    // Client-side validation wrapper logic
-    function validateAndGetFormData() {
-        var rollNoVar = $("#rollNo").val();
-        if (rollNoVar === "") {
-            alert("Roll No is a required field!");
-            $("#rollNo").focus();
-            return "";
-        }
-        var fullNameVar = $("#fullName").val();
-        if (fullNameVar === "") {
-            alert("Full Name is a required field!");
-            $("#fullName").focus();
-            return "";
-        }
-        var studentClassVar = $("#studentClass").val();
-        if (studentClassVar === "") {
-            alert("Class is a required field!");
-            $("#studentClass").focus();
-            return "";
-        }
-        var birthDateVar = $("#birthDate").val();
-        if (birthDateVar === "") {
-            alert("Birth Date is a required field!");
-            $("#birthDate").focus();
-            return "";
-        }
-        var addressVar = $("#address").val();
-        if (addressVar === "") {
-            alert("Address is a required field!");
-            $("#address").focus();
-            return "";
-        }
-        var enrollmentDateVar = $("#enrollmentDate").val();
-        if (enrollmentDateVar === "") {
-            alert("Enrollment Date is a required field!");
-            $("#enrollmentDate").focus();
-            return "";
-        }
-        
-        // Formulate JSON parsing template object stringified wrapper
-        var jsonObj = {
-            rollNo: rollNoVar,
-            fullName: fullNameVar,
-            studentClass: studentClassVar,
-            birthDate: birthDateVar,
-            address: addressVar,
-            enrollmentDate: enrollmentDateVar
-        };
-        return JSON.stringify(jsonObj);
-    }
-
-    // Checks primary key logic state on input value change event loop
-    function getStudent() {
-        var rollNoJsonObj = getRollNoAsJsonObj();
-        if (rollNoJsonObj === "") {
-            return;
-        }
-        
-        // Formulate dynamic lookup query string payload
-        var getRequest = createGET_BY_KEYRequest(connectionToken, dbName, relName, rollNoJsonObj);
-        jQuery.ajaxSetup({async: false});
-        var resJsonObj = executeCommandAtGivenBaseUrl(getRequest, jpdbBaseURL, jpdbIRL);
-        jQuery.ajaxSetup({async: true});
-        
-        if (resJsonObj.status === 400) {
-            // Case 1: Primary Key does not exist inside relation target database
-            $("#save").prop("disabled", false);
-            $("#reset").prop("disabled", false);
-            
-            // Enable all sequential payload metadata elements
-            enableFormFieldsExceptPK();
-            $("#fullName").focus();
-            
-        } else if (resJsonObj.status === 200) {
-            // Case 2: Primary Key exists inside relation target database
-            $("#rollNo").prop("disabled", true);
-            fillData(resJsonObj);
-            
-            $("#update").prop("disabled", false);
-            $("#reset").prop("disabled", false);
-            
-            enableFormFieldsExceptPK();
-            $("#fullName").focus();
-        }
-    }
-
-    function getRollNoAsJsonObj() {
-        var rollNo = $("#rollNo").val();
-        if (rollNo === "") {
-            return "";
-        }
-        return JSON.stringify({ rollNo: rollNo });
     }
 
     function enableFormFieldsExceptPK() {
@@ -199,52 +90,119 @@
         $("#enrollmentDate").prop("disabled", false);
     }
 
-    // Parses JsonPowerDB response data payload metrics dynamically to map back elements safely
-    function fillData(resJsonObj) {
-        var data = JSON.parse(resJsonObj.data).record;
-        localStorage.setItem("recno", JSON.parse(resJsonObj.data).rec_no);
+    function getStudent() {
+        var rollNo = $("#rollNo").val();
+        if (rollNo === "") return;
         
-        $("#fullName").val(data.fullName);
-        $("#studentClass").val(data.studentClass);
-        $("#birthDate").val(data.birthDate);
-        $("#address").val(data.address);
-        $("#enrollmentDate").val(data.enrollmentDate);
+        // Native JSON Request creation to eliminate external script dependency errors
+        var getReq = {
+            "token": connectionToken,
+            "cmd": "GET_BY_KEY",
+            "dbName": dbName,
+            "relName": relName,
+            "jsonStr": { "rollNo": rollNo }
+        };
+
+        $.ajax({
+            url: jpdbBaseURL + "/api/irl",
+            type: "POST",
+            data: JSON.stringify(getReq),
+            async: false,
+            success: function(response) {
+                var res = JSON.parse(response);
+                if (res.status === 200) {
+                    // Record exists
+                    $("#rollNo").prop("disabled", true);
+                    var data = JSON.parse(res.data).record;
+                    localStorage.setItem("recno", JSON.parse(res.data).rec_no);
+                    
+                    $("#fullName").val(data.fullName);
+                    $("#studentClass").val(data.studentClass);
+                    $("#birthDate").val(data.birthDate);
+                    $("#address").val(data.address);
+                    $("#enrollmentDate").val(data.enrollmentDate);
+
+                    $("#update").prop("disabled", false);
+                    $("#reset").prop("disabled", false);
+                    enableFormFieldsExceptPK();
+                    $("#fullName").focus();
+                }
+            },
+            error: function(xhr) {
+                // Record does not exist (Status 400)
+                $("#save").prop("disabled", false);
+                $("#reset").prop("disabled", false);
+                enableFormFieldsExceptPK();
+                $("#fullName").focus();
+            }
+        });
     }
 
-    // Persistent storage integration execution loops via API calls
+    function validateAndGetFormData() {
+        var fields = ["#rollNo", "#fullName", "#studentClass", "#birthDate", "#address", "#enrollmentDate"];
+        for (var i = 0; i < fields.length; i++) {
+            if ($(fields[i]).val() === "") {
+                alert("All fields are required!");
+                $(fields[i]).focus();
+                return "";
+            }
+        }
+        return JSON.stringify({
+            rollNo: $("#rollNo").val(),
+            fullName: $("#fullName").val(),
+            studentClass: $("#studentClass").val(),
+            birthDate: $("#birthDate").val(),
+            address: $("#address").val(),
+            enrollmentDate: $("#enrollmentDate").val()
+        });
+    }
+
     function saveData() {
-        var jsonStrObj = validateAndGetFormData();
-        if (jsonStrObj === "") {
-            return;
-        }
-        var putRequest = createPUTRequest(connectionToken, jsonStrObj, dbName, relName);
-        jQuery.ajaxSetup({async: false});
-        var resJsonObj = executeCommandAtGivenBaseUrl(putRequest, jpdbBaseURL, jpdbIML);
-        jQuery.ajaxSetup({async: true});
-        
-        alert("Data saved successfully!");
-        resetForm();
+        var jsonStr = validateAndGetFormData();
+        if (jsonStr === "") return;
+
+        var putReq = {
+            "token": connectionToken,
+            "cmd": "PUT",
+            "dbName": dbName,
+            "relName": relName,
+            "jsonStr": JSON.parse(jsonStr)
+        };
+
+        $.ajax({
+            url: jpdbBaseURL + "/api/iml",
+            type: "POST",
+            data: JSON.stringify(putReq),
+            success: function() {
+                alert("Data saved successfully!");
+                resetForm();
+            }
+        });
     }
 
-    // Primary records structural adjustments via Update execution commands loops
     function updateData() {
-        var jsonUpdStr = validateAndGetFormData();
-        if (jsonUpdStr === "") {
-            return;
-        }
-        var recNo = localStorage.getItem("recno");
-        if (!recNo) {
-            alert("Error: Missing internal database structural reference identifier!");
-            return;
-        }
+        var jsonStr = validateAndGetFormData();
+        if (jsonStr === "") return;
         
-        var updateRequest = createUPDATERecordRequest(connectionToken, jsonUpdStr, dbName, relName, recNo);
-        jQuery.ajaxSetup({async: false});
-        var resJsonObj = executeCommandAtGivenBaseUrl(updateRequest, jpdbBaseURL, jpdbIML);
-        jQuery.ajaxSetup({async: true});
-        
-        alert("Data updated successfully!");
-        resetForm();
+        var updateReq = {
+            "token": connectionToken,
+            "cmd": "UPDATE",
+            "dbName": dbName,
+            "relName": relName,
+            "jsonStr": {
+                [localStorage.getItem("recno")]: JSON.parse(jsonStr)
+            }
+        };
+
+        $.ajax({
+            url: jpdbBaseURL + "/api/iml",
+            type: "POST",
+            data: JSON.stringify(updateReq),
+            success: function() {
+                alert("Data updated successfully!");
+                resetForm();
+            }
+        });
     }
 </script>
 </body>

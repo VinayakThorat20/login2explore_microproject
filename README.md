@@ -1,15 +1,17 @@
 # Student Enrollment Management System 🎓
 
-> A lightweight, highly interactive frontend form execution layer backed by JsonPowerDB real-time high-performance NoSQL execution index engine.
+> A lightweight, highly interactive frontend form execution layer backed by the JsonPowerDB real-time, high-performance NoSQL execution index engine.
 
 ---
 
 ## 📋 Table of Contents
 * [Description](#description)
+* [Development Environment & Workflow Choice](#-development-environment--workflow-choice)
 * [Scope of Functionalities](#scope-of-functionalities)
 * [Benefits of using JsonPowerDB](#benefits-of-using-jsonpowerdb)
 * [Examples of Use](#examples-of-use)
 * [Project Status](#project-status)
+* [VS Code Git Workflow Commands](#-vs-code-git-workflow-commands)
 * [Release History](#release-history)
 * [Sources](#sources)
 
@@ -19,6 +21,16 @@
 This Micro Project features a production-ready **Student Enrollment Management System** single-page implementation. Built using **HTML5, JavaScript, jQuery, and Bootstrap 4**, the system delivers smooth user interactions while utilizing **JsonPowerDB (JPDB)** for low-latency backend data persistence. 
 
 The application removes transactional middleware complexity by working directly with JPDB's high-speed web services API endpoints.
+
+---
+
+## ⚡ Development Environment & Workflow Choice
+To meet tight internship deadliness and optimize the development cycle, **Visual Studio Code (VS Code)** was chosen as the primary IDE over NetBeans IDE. 
+
+**Key reasons for this workflow choice:**
+* **Speed & Agility:** VS Code's lightweight footprint allowed for instant project initialization and fluid execution compared to the heavier build load times of NetBeans.
+* **Live Server Integration:** Utilizing the VS Code `Live Server` extension instantly resolved local browser security restrictions (CORS), allowing seamless asynchronous AJAX calls to the JsonPowerDB endpoints during rapid testing.
+* **Embedded Git Terminal:** The integrated terminal streamlined code tracking and synchronization directly into GitHub without shifting window contexts.
 
 ---
 
@@ -55,20 +67,35 @@ The application removes transactional middleware complexity by working directly 
 ---
 
 ## 📊 Project Status
-* **Core Core Pipeline Engine Layer:** `Completed`
+* **Core Pipeline Engine Layer:** `Completed`
 * **Bootstrap Frontend Element Components Layout Layer:** `Completed`
 * **Real-time API Persistence Sync Engine Connection Integrations:** `Completed`
 
 ---
 
-## 📜 Release History
-* **v1.0.0 (Current Stable Production)**
-  * Initial production micro-project delivery deployment.
-  * Implemented structural control button lifecycle flow sequences tracking parameters safely.
-  * Integrated native standard configuration variables mappings over real-world cloud connection strings.
+## 💻 VS Code Git Workflow Commands
+The local workspace synchronization to the GitHub remote repository was executed natively within the VS Code integrated terminal using the following sequential commands:
 
----
+```bash
+# 1. Initialize local repository workspace tracking
+git init
 
-## 📂 Sources & Documentation References
-* [JsonPowerDB Dynamic Reference Guide Sheets](https://login2explore.com/jpdb/docs.html)
-* [Bootstrap Framework Theme Core Architecture Layout Toolkits](https://getbootstrap.com/docs/4.5/getting-started/introduction/)
+# 2. Stage workspace assets for the baseline snapshot
+git add index.html README.md
+
+# 3. Commit staged files to the local branch history
+git commit -m "feat: complete student enrollment form micro project with JPDB lifecycle integration"
+
+# 4. Set the default operational tracking branch to main
+git branch -M main
+
+# 5. Connect the local repository to the remote GitHub landing target
+git remote add origin [https://github.com/YOUR_GITHUB_USERNAME_HERE/login2explore_microproject.git](https://github.com/YOUR_GITHUB_USERNAME_HERE/login2explore_microproject.git)
+
+# 6. Push code to the remote repository upstream channel
+git push -u origin main
+
+# 7. (Incremental Patch Fix) Push logic updates and new connection token properties
+git add index.html README.md
+git commit -m "fix: resolve form locking logic and update readme profiles"
+git push origin main

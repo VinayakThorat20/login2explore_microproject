@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Enrollment Form - JsonPowerDB</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://login2explore.com/jpdb/resources/js/0.3.0/jpdb-commons.js"></script>
+</head>
+<body>
+<div class="container my-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white text-center">
+            <h3>Student Enrollment Form (Micro Project)</h3>
+        </div>
+        <div class="card-body">
+            <form id="studentForm" method="post">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="rollNo">Roll No <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="rollNo" placeholder="Enter Roll No" onchange="getStudent()">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="fullName">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="fullName" placeholder="Enter Full Name" disabled>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="studentClass">Class <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="studentClass" placeholder="Enter Class (e.g., 10th, 12th)" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="birthDate">Birth Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="birthDate" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="address">Address <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="address" rows="2" placeholder="Enter Complete Address" disabled></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="enrollmentDate">Enrollment Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="enrollmentDate" disabled>
+                </div>
+                
+                <hr>
+                <div class="text-center mt-4">
+                    <button type="button" class="btn btn-success mx-2 px-4" id="save" onclick="saveData()" disabled>Save</button>
+                    <button type="button" class="btn btn-warning mx-2 px-4" id="update" onclick="updateData()" disabled>Update</button>
+                    <button type="button" class="btn btn-secondary mx-2 px-4" id="reset" onclick="resetForm()" disabled>Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuration Global Constants
+    const jpdbBaseURL = "http://api.login2explore.com:5577";
+    const jpdbIRL = "/api/irl";
+    const jpdbIML = "/api/iml";
+    const connectionToken = "764066020|7385821567730593106|764064680";
+    const dbName = "SCHOOL-DB";
+    const relName = "STUDENT-TABLE";
+
+    // Initialize form on page load
+    $(document).ready(function() {
+        resetForm();
+    });
+
+    // Step-2/Reset Logic: Clear fields, disable except primary key, set focus
+    function resetForm() {
+        $("#rollNo").val("");
+        $("#fullName").val("");
+        $("#studentClass").val("");
+        $("#birthDate").val("");
+        $("#address").val("");
+        $("#enrollmentDate").val("");
+        
+        // Form field accessibility state
+        $("#rollNo").prop("disabled", false);
+        $("#fullName").prop("disabled", true);
+        $("#studentClass").prop("disabled", true);
+        $("#birthDate").prop("disabled", true);
+        $("#address").prop("disabled", true);
+        $("#enrollmentDate").prop("disabled", true);
+        
+        // Control Button initial states
+        $("#save").prop("disabled", true);
+        $("#update").prop("disabled", true);
+        $("#reset").prop("disabled", true);
+        
+        localStorage.removeItem("recno");
+        $("#rollNo").focus();
+    }
+
+    // Client-side validation wrapper logic
+    function validateAndGetFormData() {
+        var rollNoVar = $("#rollNo").val();
+        if (rollNoVar === "") {
+            alert("Roll No is a required field!");
+            $("#rollNo").focus();
+            return "";
+        }
+        var fullNameVar = $("#fullName").val();
+        if (fullNameVar === "") {
+            alert("Full Name is a required field!");
+            $("#fullName").focus();
+            return "";
+        }
+        var studentClassVar = $("#studentClass").val();
+        if (studentClassVar === "") {
+            alert("Class is a required field!");
+            $("#studentClass").focus();
+            return "";
+        }
+        var birthDateVar = $("#birthDate").val();
+        if (birthDateVar === "") {
+            alert("Birth Date is a required field!");
+            $("#birthDate").focus();
+            return "";
+        }
+        var addressVar = $("#address").val();
+        if (addressVar === "") {
+            alert("Address is a required field!");
+            $("#address").focus();
+            return "";
+        }
+        var enrollmentDateVar = $("#enrollmentDate").val();
+        if (enrollmentDateVar === "") {
+            alert("Enrollment Date is a required field!");
+            $("#enrollmentDate").focus();
+            return "";
+        }
+        
+        // Formulate JSON parsing template object stringified wrapper
+        var jsonObj = {
+            rollNo: rollNoVar,
+            fullName: fullNameVar,
+            studentClass: studentClassVar,
+            birthDate: birthDateVar,
+            address: addressVar,
+            enrollmentDate: enrollmentDateVar
+        };
+        return JSON.stringify(jsonObj);
+    }
+
+    // Checks primary key logic state on input value change event loop
+    function getStudent() {
+        var rollNoJsonObj = getRollNoAsJsonObj();
+        if (rollNoJsonObj === "") {
+            return;
+        }
+        
+        // Formulate dynamic lookup query string payload
+        var getRequest = createGET_BY_KEYRequest(connectionToken, dbName, relName, rollNoJsonObj);
+        jQuery.ajaxSetup({async: false});
+        var resJsonObj = executeCommandAtGivenBaseUrl(getRequest, jpdbBaseURL, jpdbIRL);
+        jQuery.ajaxSetup({async: true});
+        
+        if (resJsonObj.status === 400) {
+            // Case 1: Primary Key does not exist inside relation target database
+            $("#save").prop("disabled", false);
+            $("#reset").prop("disabled", false);
+            
+            // Enable all sequential payload metadata elements
+            enableFormFieldsExceptPK();
+            $("#fullName").focus();
+            
+        } else if (resJsonObj.status === 200) {
+            // Case 2: Primary Key exists inside relation target database
+            $("#rollNo").prop("disabled", true);
+            fillData(resJsonObj);
+            
+            $("#update").prop("disabled", false);
+            $("#reset").prop("disabled", false);
+            
+            enableFormFieldsExceptPK();
+            $("#fullName").focus();
+        }
+    }
+
+    function getRollNoAsJsonObj() {
+        var rollNo = $("#rollNo").val();
+        if (rollNo === "") {
+            return "";
+        }
+        return JSON.stringify({ rollNo: rollNo });
+    }
+
+    function enableFormFieldsExceptPK() {
+        $("#fullName").prop("disabled", false);
+        $("#studentClass").prop("disabled", false);
+        $("#birthDate").prop("disabled", false);
+        $("#address").prop("disabled", false);
+        $("#enrollmentDate").prop("disabled", false);
+    }
+
+    // Parses JsonPowerDB response data payload metrics dynamically to map back elements safely
+    function fillData(resJsonObj) {
+        var data = JSON.parse(resJsonObj.data).record;
+        localStorage.setItem("recno", JSON.parse(resJsonObj.data).rec_no);
+        
+        $("#fullName").val(data.fullName);
+        $("#studentClass").val(data.studentClass);
+        $("#birthDate").val(data.birthDate);
+        $("#address").val(data.address);
+        $("#enrollmentDate").val(data.enrollmentDate);
+    }
+
+    // Persistent storage integration execution loops via API calls
+    function saveData() {
+        var jsonStrObj = validateAndGetFormData();
+        if (jsonStrObj === "") {
+            return;
+        }
+        var putRequest = createPUTRequest(connectionToken, jsonStrObj, dbName, relName);
+        jQuery.ajaxSetup({async: false});
+        var resJsonObj = executeCommandAtGivenBaseUrl(putRequest, jpdbBaseURL, jpdbIML);
+        jQuery.ajaxSetup({async: true});
+        
+        alert("Data saved successfully!");
+        resetForm();
+    }
+
+    // Primary records structural adjustments via Update execution commands loops
+    function updateData() {
+        var jsonUpdStr = validateAndGetFormData();
+        if (jsonUpdStr === "") {
+            return;
+        }
+        var recNo = localStorage.getItem("recno");
+        if (!recNo) {
+            alert("Error: Missing internal database structural reference identifier!");
+            return;
+        }
+        
+        var updateRequest = createUPDATERecordRequest(connectionToken, jsonUpdStr, dbName, relName, recNo);
+        jQuery.ajaxSetup({async: false});
+        var resJsonObj = executeCommandAtGivenBaseUrl(updateRequest, jpdbBaseURL, jpdbIML);
+        jQuery.ajaxSetup({async: true});
+        
+        alert("Data updated successfully!");
+        resetForm();
+    }
+</script>
+</body>
+</html>

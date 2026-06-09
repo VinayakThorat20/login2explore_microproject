@@ -73,29 +73,5 @@ To meet tight internship deadliness and optimize the development cycle, **Visual
 
 ---
 
-## 💻 VS Code Git Workflow Commands
-The local workspace synchronization to the GitHub remote repository was executed natively within the VS Code integrated terminal using the following sequential commands:
-
-```bash
-# 1. Initialize local repository workspace tracking
-git init
-
-# 2. Stage workspace assets for the baseline snapshot
-git add index.html README.md
-
-# 3. Commit staged files to the local branch history
-git commit -m "feat: complete student enrollment form micro project with JPDB lifecycle integration"
-
-# 4. Set the default operational tracking branch to main
-git branch -M main
-
-# 5. Connect the local repository to the remote GitHub landing target
-git remote add origin [https://github.com/YOUR_GITHUB_USERNAME_HERE/login2explore_microproject.git](https://github.com/YOUR_GITHUB_USERNAME_HERE/login2explore_microproject.git)
-
-# 6. Push code to the remote repository upstream channel
-git push -u origin main
-
-# 7. (Incremental Patch Fix) Push logic updates and new connection token properties
-git add index.html README.md
-git commit -m "fix: resolve form locking logic and update readme profiles"
+e form locking logic and update readme profiles"
 git push origin main
